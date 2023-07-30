@@ -1,5 +1,4 @@
 const db = require("../models");
-
 let createSpecialty = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -16,7 +15,7 @@ let createSpecialty = (data) => {
       } else {
         await db.Specialty.create({
           name: data.name,
-          image: data.image,
+          image: data.imageBase64,
           descriptionHtml: data.descriptionHtml,
           descriptionMarkdown: data.descriptionMarkdown,
         });
@@ -36,19 +35,32 @@ let getAllSpecialty = () => {
   return new Promise(async (resolve, reject) => {
     try {
       let data = await db.Specialty.findAll({});
+      const speCount = await db.Specialty.count({});
       if (data && data.length > 0) {
         data.map((item) => {
-          item.image = new Buffer(
-            item.image,
-            "base64"
-          ).toString("binary");
+          // if (data !== null) {
+          //   const bufferData = Buffer.from(data);
+          //   // Rest of your code with the bufferData
+          // } else {
+          // item.image = new Buffer(
+          //   item.image,
+          //   "base64"
+          // ).toString("binary");
+          if (item.image !== null) {
+            item.image = Buffer.from(
+              item.image,
+              "base64"
+            ).toString("binary");
+          }
           return item;
+          // }
         });
       }
       resolve({
         errCode: 0,
         errMessage: "OK",
         data,
+        speCount,
       });
     } catch (e) {
       reject(e);
@@ -72,6 +84,9 @@ let getAllSpecialtyDoctor = (inpId, location) => {
           attributes: [
             "descriptionHtml",
             "descriptionMarkdown",
+            "value_en",
+            "htmlEn",
+            "markdownEn",
           ],
         });
 
@@ -155,6 +170,9 @@ let handleEditSpecialty = (data) => {
         specialty.descriptionHtml = data.descriptionHtml;
         specialty.descriptionMarkdown =
           data.descriptionMarkdown;
+        specialty.value_en = data.value_en;
+        specialty.htmlEn = data.htmlEn;
+        specialty.markdownEn = data.markdownEn;
         if (data.imageBase64) {
           specialty.image = data.imageBase64;
         }

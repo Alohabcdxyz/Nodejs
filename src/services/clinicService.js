@@ -1,4 +1,5 @@
 const db = require("../models");
+import { sequelize } from "../config/connectDB";
 
 let createClinic = (data) => {
   return new Promise(async (resolve, reject) => {
@@ -38,6 +39,7 @@ let getAllClinic = () => {
   return new Promise(async (resolve, reject) => {
     try {
       let data = await db.Clinic.findAll({});
+      const clinicCount = await db.Clinic.count({});
       if (data && data.length > 0) {
         data.map((item) => {
           item.image = new Buffer(
@@ -51,6 +53,7 @@ let getAllClinic = () => {
         errCode: 0,
         errMessage: "OK",
         data,
+        clinicCount,
       });
     } catch (e) {
       reject(e);
@@ -76,6 +79,9 @@ let getAllClinicDoctor = (inpId) => {
             "name",
             "descriptionHtml",
             "descriptionMarkdown",
+            "htmlEn",
+            "value_en",
+            "markdownEn",
           ],
         });
 
@@ -148,6 +154,9 @@ let handleEditClinic = (data) => {
         clinic.descriptionHtml = data.descriptionHtml;
         clinic.descriptionMarkdown =
           data.descriptionMarkdown;
+        clinic.value_en = data.value_en;
+        clinic.htmlEn = data.htmlEn;
+        clinic.markdownEn = data.markdownEn;
         if (data.imageBase64) {
           clinic.image = data.imageBase64;
         }

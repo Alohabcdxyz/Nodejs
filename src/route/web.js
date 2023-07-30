@@ -64,6 +64,10 @@ let initWebRoutes = (app) => {
     doctorController.getScheduleDoctorByDate
   );
   router.get(
+    "/api/get-schedule-doctor-booking-by-date",
+    doctorController.getScheduleDoctorBookingByDate
+  );
+  router.get(
     "/api/get-extra-infor-doctor-by-id",
     doctorController.getExtraInforDoctorById
   );
@@ -168,6 +172,11 @@ let initWebRoutes = (app) => {
   router.put(
     "/api/edit-handbook",
     handbookController.editHandbook
+  );
+
+  router.get(
+    "/api/get-detail-handbook",
+    handbookController.getAllDetailHandbook
   );
 
   return app.use("/", router);

@@ -9,6 +9,11 @@ module.exports = (sequelize, DataTypes) => {
      */
     static associate(models) {
       // define association here
+      Handbook.belongsTo(models.User, {
+        foreignKey: "adminId",
+        targetKey: "id",
+        as: "adminData",
+      });
     }
   }
   Handbook.init(
@@ -18,6 +23,9 @@ module.exports = (sequelize, DataTypes) => {
       descriptionMarkdown: DataTypes.TEXT,
       image: DataTypes.TEXT,
       status: DataTypes.INTEGER,
+      value_en: DataTypes.TEXT,
+      htmlEn: DataTypes.TEXT,
+      markdownEn: DataTypes.TEXT,
     },
     {
       sequelize,

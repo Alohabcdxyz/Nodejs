@@ -17,7 +17,6 @@ let getCRUD = (req, res) => {
 
 let displayCRUD = async (req, res) => {
   let data = await CRUDService.getAllUser();
-  console.log(data);
   return res.render("displayUser.ejs", {
     dataTable: data,
   });

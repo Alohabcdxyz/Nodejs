@@ -25,6 +25,19 @@ let getTopDoctor = (limitRecord) => {
             as: "genderData",
             attributes: ["value_en", "value_vi"],
           },
+          {
+            model: db.Doctor_Infor,
+            attributes: {
+              exclude: ["id", "doctorId"],
+            },
+            include: [
+              {
+                model: db.Specialty,
+                as: "specialtyData",
+                attributes: ["name", "value_en"],
+              },
+            ],
+          },
         ],
         raw: true,
         nest: true,
@@ -48,10 +61,14 @@ let getAllDoctor = () => {
           exclude: ["password", "image"],
         },
       });
+      const doctorCount = await db.User.count({
+        where: { roleId: "R2" },
+      });
 
       resolve({
         errCode: 0,
         data: doctor,
+        doctorCount,
       });
     } catch (e) {
       reject(e);
@@ -104,6 +121,9 @@ let saveInforDoctor = (inpData) => {
             contentHtml: inpData.contentHtml,
             contentMarkdown: inpData.contentMarkdown,
             description: inpData.description,
+            value_en: inpData.value_en,
+            markdownEn: inpData.markdownEn,
+            htmlEn: inpData.htmlEn,
             doctorId: inpData.doctorId,
           });
         }
@@ -120,6 +140,9 @@ let saveInforDoctor = (inpData) => {
               inpData.contentMarkdown;
             doctorMarkdown.description =
               inpData.description;
+            doctorMarkdown.value_en = inpData.value_en;
+            doctorMarkdown.htmlEn = inpData.htmlEn;
+            doctorMarkdown.markdownEn = inpData.markdownEn;
             await doctorMarkdown.save();
           }
         }
@@ -192,6 +215,9 @@ let getInforDoctorById = (inpId) => {
                 "description",
                 "contentHtml",
                 "contentMarkdown",
+                "value_en",
+                "htmlEn",
+                "markdownEn",
               ],
             },
             {
@@ -354,6 +380,37 @@ let getScheduleDoctorByDate = (doctorId, date) => {
   });
 };
 
+let getScheduleDoctorBookingByDate = (doctorId, date) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!doctorId || !date) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing para",
+        });
+      } else {
+        let dataSchedule = await db.Booking.findAll({
+          where: {
+            doctorId: doctorId,
+            date: date,
+          },
+          raw: false,
+          nest: true,
+        });
+        if (!dataSchedule) {
+          dataSchedule = [];
+        }
+        resolve({
+          errCode: 0,
+          data: dataSchedule,
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
 let getExtraInforDoctorById = (idInp) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -461,6 +518,9 @@ let getProfileDoctorById = (inpId) => {
                 "description",
                 "contentHtml",
                 "contentMarkdown",
+                "value_en",
+                "htmlEn",
+                "markdownEn",
               ],
             },
           ],
@@ -532,20 +592,19 @@ let getListBooking = (doctorId, date) => {
             },
             // {
             //   model: db.Doctor_Infor,
-            //   include: [
-            //     {
-            //       model: db.Allcode,
-            //       as: "priceData",
-            //       attributes: ["value_en", "value_vi"],
-            //     },
-            //   ],
-            //   where: { doctorId: doctorId },
+            //   as: "doctorData",
+            //   // include: [
+            //   //   {
+            //   //     model: db.Allcode,
+            //   //     as: "priceData",
+            //   //     attributes: ["value_en", "value_vi"],
+            //   //   },
+            //   // ],
             // },
           ],
           raw: false,
           nest: true,
         });
-
         resolve({
           errCode: 0,
           message: "Save Success",
@@ -626,6 +685,7 @@ let getListBookingNotConfirm = (doctorId, date) => {
                 "address",
                 "gender",
                 "reason",
+                "phoneNumber",
               ],
               include: [
                 {
@@ -682,6 +742,7 @@ let getListBookingDone = (doctorId, date) => {
                 "address",
                 "gender",
                 "reason",
+                "phoneNumber",
               ],
               include: [
                 {
@@ -738,6 +799,7 @@ let getListBookingCancel = (doctorId, date) => {
                 "address",
                 "gender",
                 "reason",
+                "phoneNumber",
               ],
               include: [
                 {
@@ -819,6 +881,7 @@ module.exports = {
   getInforDoctorById,
   bulkCreateSchedule,
   getScheduleDoctorByDate,
+  getScheduleDoctorBookingByDate,
   getExtraInforDoctorById,
   getProfileDoctorById,
   getListBooking,

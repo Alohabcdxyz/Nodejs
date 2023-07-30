@@ -21,6 +21,9 @@ let createHandbook = (data) => {
           image: data.imageBase64,
           descriptionHtml: data.descriptionHtml,
           descriptionMarkdown: data.descriptionMarkdown,
+          value_en: data.value_en,
+          htmlEn: data.htmlEn,
+          markdownEn: data.markdownEn,
         });
 
         resolve({
@@ -38,6 +41,7 @@ let getAllHandbook = () => {
   return new Promise(async (resolve, reject) => {
     try {
       let data = await db.Handbook.findAll();
+      const handbookCount = await db.Handbook.count({});
       if (data && data.length > 0) {
         data.map((item) => {
           item.image = new Buffer(
@@ -51,6 +55,7 @@ let getAllHandbook = () => {
         errCode: 0,
         errMessage: "OK",
         data,
+        handbookCount,
       });
     } catch (e) {
       reject(e);
@@ -74,6 +79,9 @@ let editHandbook = (data) => {
 
       if (handbook) {
         handbook.name = data.name;
+        handbook.value_en = data.value_en;
+        handbook.htmlEn = data.htmlEn;
+        handbook.markdownEn = data.markdownEn;
         handbook.descriptionHtml = data.descriptionHtml;
         handbook.descriptionMarkdown =
           data.descriptionMarkdown;
@@ -99,8 +107,85 @@ let editHandbook = (data) => {
   });
 };
 
+let getAllDetailHandbook = (inpId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!inpId) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing para",
+        });
+      } else {
+        let data = await db.Handbook.findOne({
+          where: {
+            id: inpId,
+          },
+          attributes: [
+            "descriptionHtml",
+            "descriptionMarkdown",
+            "name",
+            "createdAt",
+            "updatedAt",
+            "value_en",
+            "htmlEn",
+            "markdownEn",
+          ],
+          include: [
+            {
+              model: db.User,
+              as: "adminData",
+              attributes: ["firstName", "lastName"],
+              // where: {
+              //   adminId: 1,
+              // },
+            },
+          ],
+          raw: false,
+          nest: true,
+        });
+
+        // if (data) {
+        //   let doctorSpecialty = {};
+        //   if (location === "ALL") {
+        //     doctorSpecialty = await db.Doctor_Infor.findAll(
+        //       {
+        //         where: {
+        //           specialtyId: inpId,
+        //         },
+        //         attributes: ["doctorId", "provinceId"],
+        //       }
+        //     );
+        //   } else {
+        //     doctorSpecialty = await db.Doctor_Infor.findAll(
+        //       {
+        //         where: {
+        //           specialtyId: inpId,
+        //           provinceId: location,
+        //         },
+        //         attributes: ["doctorId", "provinceId"],
+        //       }
+        //     );
+        //   }
+        //   data.doctorSpecialty = doctorSpecialty;
+        // } else {
+        //   data = {};
+        // }
+
+        resolve({
+          errCode: 0,
+          errMessage: "OK",
+          data: data,
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+
 module.exports = {
   createHandbook,
   getAllHandbook,
   editHandbook,
+  getAllDetailHandbook,
 };

@@ -34,8 +34,24 @@ let editHandbook = async (req, res) => {
   return res.status(200).json(message);
 };
 
+let getAllDetailHandbook = async (req, res) => {
+  try {
+    let infor = await handbookService.getAllDetailHandbook(
+      req.query.id
+    );
+    return res.status(200).json(infor);
+  } catch (e) {
+    console.log(e);
+    return res.status(200).json({
+      errCode: -1,
+      errMessage: "Error from server",
+    });
+  }
+};
+
 module.exports = {
   createHandbook,
   getAllHandbook,
   editHandbook,
+  getAllDetailHandbook,
 };
